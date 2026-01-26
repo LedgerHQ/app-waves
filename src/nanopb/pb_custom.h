@@ -5,7 +5,7 @@
 #include "os.h"
 #include "cx.h"
 #include "pb.h"
-#include "main.h"
+#include "globals.h"
 
 /* Custom `pb_istream_s.state` structure that handles decoding from apdu
  * streaming */
@@ -15,7 +15,7 @@
 pb_istream_t apdu_pb_istream(uiProtobuf_t *ctx, uint8_t *init_buffer,
                              uint8_t init_buffer_size,
                              uint16_t total_buffer_size);
-pb_istream_t pb_istream_from_apdu(uiProtobuf_t *ctx, uint8_t *init_buffer,
+pb_istream_t pb_istream_from_apdu(uiProtobuf_t *ctx, const uint8_t *init_buffer,
                                   uint8_t init_buffer_size,
                                   uint16_t total_buffer_size,
                                   uint8_t start_index);

@@ -103,6 +103,8 @@
     #    }
 
 from ragger.backend.interface import BackendInterface, RAPDU
+import time
+from ragger.navigator import NavInsID, NavIns
 from ragger.bip import pack_derivation_path
 from typing import Optional
 from enum import IntEnum
@@ -168,8 +170,8 @@ class WavesSignData:
     def get_async_response(self) -> Optional[RAPDU]:
         return self.backend.last_async_response
 
-    def sign_custom_data(self, path: str, data: bytes, chain_id: int = WAVES_CONFIG.MAIN_NET_CODE) -> RAPDU:
-        sData = SignData(data_type=SIGNED_CODES.SOME_DATA, data_version=0, bytes=data, amountPrecision=0, amount2Precision=0, feePrecision=0)
+    def sign_custom_data(self, path: str, data: bytes, chain_id: int = WAVES_CONFIG.MAIN_NET_CODE, data_type: int = SIGNED_CODES.SOME_DATA) -> RAPDU:
+        sData = SignData(data_type=data_type, data_version=0, bytes=data, amountPrecision=0, amount2Precision=0, feePrecision=0)
         bytes = self.prepare_data(path, sData)
         return self.sign_data(data=bytes, chain_id=chain_id)
     
@@ -242,3 +244,45 @@ class WavesSignData:
                                            data=tx_chunk)
         return result
     
+
+class WavesTestEngine:
+    def __init__(self, backend, navigator, client):
+        self.backend = backend
+        self.navigator = navigator
+        self.client = client
+
+    def run_sign_test(self, path, tx_type, version, data_b58, chain_id=ord("W"), num_clicks=9):
+        from application_client.waves_signature import ed25519_verify
+        from application_client.async_exec import run_with_delay
+        import base58
+
+        sign_data = base58.b58decode(data_b58)
+        
+        path_bytes = self.client.pack_derivation_path(path)
+        response = self.client.get_public_key(chain_id=chain_id, data=path_bytes)
+        public_key, _ = self.client.parse_pk_response(response.data)
+
+        def review_approve():
+            print(f"\n[Engine] Waiting for device UI...")
+            self.backend.wait_for_text_on_screen("Review") 
+            time.sleep(1.5)
+            print(f"\n[Engine] Begin Review...")
+            instructions = [NavIns(NavInsID.RIGHT_CLICK)] * num_clicks
+            instructions.append(NavIns(NavInsID.BOTH_CLICK))
+
+            self.navigator.navigate(instructions, screen_change_before_first_instruction=False)
+            print("[Engine] Navigation complete.")
+
+        def signing_call():
+            return self.client.sign_tx(
+                path=path, tx_type=tx_type, data_version=version, 
+                data=sign_data, chain_id=chain_id, amountPrecision=8
+            )
+
+        final_response = run_with_delay(signing_call, review_approve, delay=0.5)
+
+        assert final_response.status == 0x9000
+        is_valid = ed25519_verify(signature=final_response.data, data=sign_data, public_key=public_key)
+        assert is_valid, "Signature verification failed!"
+        print("[Engine] Success!")
+        return final_response    

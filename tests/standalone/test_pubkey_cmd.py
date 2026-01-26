@@ -4,7 +4,8 @@ from ragger.backend.interface import BackendInterface
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 from ragger.error import ExceptionRAPDU
 from ragger.backend.interface import BackendInterface
-
+from application_client.boilerplate_command_sender import BoilerplateCommandSender
+from application_client.boilerplate_command_sender import Errors
 from application_client.boilerplate_command_sender import BoilerplateCommandSender, Errors
 from application_client.boilerplate_response_unpacker import unpack_get_public_key_response
 
@@ -26,7 +27,7 @@ def test_get_public_key_no_confirm(backend: BackendInterface) -> None:
         assert sw == 0x9000
         assert len(public_key) == 32
         assert len(address_bytes) == 35
-
+        assert address_bytes.decode('utf-8') == "3P3iWa95nuathZn7EtFHxVBafrvMvPTkGPs"
 
 def test_get_public_key_confirm_refused(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     client = BoilerplateCommandSender(backend)
@@ -37,11 +38,12 @@ def test_get_public_key_confirm_refused(backend: BackendInterface, scenario_navi
         with client.get_public_key_with_confirmation(chain_id=ord("W"), data=data):
             scenario_navigator.address_review_reject()
 
+
     # Assert that we have received a refusal
-    assert e.value.status == Errors.SW_DENY
+    assert e.value.status == Errors.SW_CONDITIONS_NOT_SATISFIED
     assert len(e.value.data) == 0
 
-# In this test we check that the GET_PUBLIC_KEY works in confirmation mode
+# # In this test we check that the GET_PUBLIC_KEY works in confirmation mode
 def test_get_public_key_confirm_accepted(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     client = BoilerplateCommandSender(backend)
     path = "m/44'/5741564'/0'/0'/1'"
@@ -56,6 +58,7 @@ def test_get_public_key_confirm_accepted(backend: BackendInterface, scenario_nav
     assert sw == 0x9000
     assert len(public_key) == 32
     assert len(address_bytes) == 35
+    assert address_bytes.decode('utf-8') == "3P3iWa95nuathZn7EtFHxVBafrvMvPTkGPs"
 
 def parse_response(response: bytes):
     if len(response) < 32 + 35:

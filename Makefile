@@ -1,168 +1,141 @@
-#*******************************************************************************
-#   Ledger Blue
-#   (c) 2016 Ledger
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-#*******************************************************************************
+# /*******************************************************************************
+#  *   Waves Platform Wallet App for Nano Ledger devices
+#  *   Copyright (c) 2017-2020 Vladislav Petushkov <vladislav.petushkov@gmail.com>
+#  *
+#  *   Based on Sample code provided (c) 2016 Ledger and
+#  *                                 (c) 2017-2018 Jake B. (Burstcoin app)
+#  *
+#  *  Licensed under the Apache License, Version 2.0 (the "License");
+#  *  you may not use this file except in compliance with the License.
+#  *  You may obtain a copy of the License at
+#  *
+#  *      http://www.apache.org/licenses/LICENSE-2.0
+#  *
+#  *  Unless required by applicable law or agreed to in writing, software
+#  *  distributed under the License is distributed on an "AS IS" BASIS,
+#  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  *  See the License for the specific language governing permissions and
+#  *  limitations under the License.
+#  ********************************************************************************/
 
 ifeq ($(BOLOS_SDK),)
-$(error BOLOS_SDK is not set)
+$(error Environment variable BOLOS_SDK is not set)
 endif
-include $(BOLOS_SDK)/Makefile.defines
+
 include $(BOLOS_SDK)/Makefile.target
-# Main app configuration
 
-APPVERSION_M=1
-APPVERSION_N=2
-APPVERSION_P=3
-
+########################################
+#        Mandatory configuration       #
+########################################
+# Application name
 APPNAME = "Waves"
-APPVERSION = $(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 
-ifeq ($(TARGET_NAME),TARGET_BLUE)
-    ICONNAME=icons/blue_app_waves.gif
-else ifeq ($(TARGET_NAME),TARGET_NANOS)
-    ICONNAME=icons/nanos_app_waves.gif
-else
-    ICONNAME = icons/nanox_app_waves.gif
-endif
+# Application version
+APPVERSION_M = 2
+APPVERSION_N = 0
+APPVERSION_P = 1
+APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
+
+# Application source files
+APP_SOURCE_PATH += src
+
+# Application icons following guidelines:
+# https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
+ICON_NANOX = icons/app_waves_14px.gif
+ICON_NANOSP = icons/app_waves_14px.gif
+ICON_STAX = icons/app_waves_32px.gif
+ICON_FLEX = icons/app_waves_40px.gif
+ICON_APEX_P = icons/app_waves_32px_apex.png
 
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
     # With the Nano NBGL Design, the Home Screen icon is the reverse of the App icon:
     # It should be on white background, with rounded corners.
     # This definition allows SDK Makefiles to automatically generate it based on the App icon.
     # Please note that the icon is dynamically generated, and declared in the .gitignore to avoid storing it.
-    ICON_HOME_NANO = glyphs/icon_waves.gif
+    ICON_HOME_NANO = glyphs/home_waves_14px.gif
 endif
 
-ICON_NANOX = icons/nanox_app_waves.gif
-ICON_NANOSP = icons/nanox_app_waves.gif
+
+# Application allowed derivation curves.
+# Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1
+# If your app needs it, you can specify multiple curves by using:
+# `CURVE_APP_LOAD_PARAMS = <curve1> <curve2>`
+CURVE_APP_LOAD_PARAMS = secp256k1 ed25519
+
+# Application allowed derivation paths.
+# You should request a specific path for your app.
+# This serve as an isolation mechanism.
+# Most application will have to request a path according to the BIP-0044
+# and SLIP-0044 standards.
+# If your app needs it, you can specify multiple path by using:
+# `PATH_APP_LOAD_PARAMS = "44'/1'" "45'/1'"`
+PATH_APP_LOAD_PARAMS = "44'/5741564'"   # purpose=coin(44) / coin_type=Testnet(1)
+
+# Setting to allow building variant applications
+# - <VARIANT_PARAM> is the name of the parameter which should be set
+#   to specify the variant that should be build.
+# - <VARIANT_VALUES> a list of variant that can be build using this app code.
+#   * It must at least contains one value.
+#   * Values can be the app ticker or anything else but should be unique.
+VARIANT_PARAM = COIN
+VARIANT_VALUES = Waves
+
+# Enabling DEBUG_OVER_USB flag will enable PRINTF over USB
+# This will force DISABLE_OS_IO_STACK_USE and add USB CDC profile
+# The log can be displayed using a COM port terminal
+#DEBUG_OVER_USB = 1
+
+########################################
+#     Application custom permissions   #
+########################################
+# See SDK `include/appflags.h` for the purpose of each permission
+#HAVE_APPLICATION_FLAG_DERIVE_MASTER = 1
+#HAVE_APPLICATION_FLAG_GLOBAL_PIN = 1
+#HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
+#HAVE_APPLICATION_FLAG_LIBRARY = 1
+
+########################################
+# Application communication interfaces #
+########################################
+ENABLE_BLUETOOTH = 1
+#ENABLE_NFC = 1
+ENABLE_NBGL_FOR_NANO_DEVICES = 1
+
+########################################
+#         NBGL custom features         #
+########################################
+ENABLE_NBGL_QRCODE = 1
+#ENABLE_NBGL_KEYBOARD = 1
+#ENABLE_NBGL_KEYPAD = 1
+
+########################################
+#          TLV & PKI features          #
+########################################
+# Both are used in the Dynamic Token example
+ENABLE_TLV_LIBRARY = 1
+ENABLE_PKI_LIBRARY = 1
 
 
-APP_LOAD_PARAMS = --appFlags 0x240 --path "44'/5741564'" --curve secp256k1 --curve ed25519 $(COMMON_LOAD_PARAMS)
+########################################
+#          Features disablers          #
+########################################
+# These advanced settings allow to disable some feature that are by
+# default enabled in the SDK `Makefile.standard_app`.
+#DISABLE_STANDARD_APP_FILES = 1
+#DISABLE_DEFAULT_IO_SEPROXY_BUFFER_SIZE = 1 # To allow custom size declaration
+#DISABLE_STANDARD_APP_DEFINES = 1 # Will set all the following disablers
+#DISABLE_STANDARD_SNPRINTF = 1
+#DISABLE_STANDARD_USB = 1
+#DISABLE_STANDARD_WEBUSB = 1
+#DISABLE_DEBUG_LEDGER_ASSERT = 1
+#DISABLE_DEBUG_THROW = 1
 
-# Build configuration
+include $(BOLOS_SDK)/Makefile.standard_app
 
-### variables processed by the common makefile.rules of the SDK to grab source files and include dirs
-APP_SOURCE_PATH  += src
-SDK_SOURCE_PATH  += lib_stusb #qrcode
-#use the SDK U2F+HIDGEN USB profile
-SDK_SOURCE_PATH  += lib_u2f lib_stusb_impl
-SDK_SOURCE_PATH  += lib_ux
-DEFINES          += HAVE_UX_FLOW
+# DEBUG = 0
 
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+ifeq ($(DEBUG), 1)
+    DEFINES += HAVE_PRINTF PRINTF=screen_printf
+    # Для Speculos иногда используется:
+    DEFINES += HAVE_PRINTF PRINTF=mcu_usb_printf
 endif
-
-DEFINES += APPVERSION=\"$(APPVERSION)\"
-DEFINES += APPNAME=\"$(APPNAME)\"
-
-#for debug only
-DEFINES += OS_IO_SEPROXYHAL
-DEFINES += HAVE_BAGL HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
-DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU TCS_LOADER_PATCH_VERSION=0
-DEFINES += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERSION_N) LEDGER_PATCH_VERSION=$(APPVERSION_P)
-DEFINES += BLAKE_SDK
-
-# U2F Support
-DEFINES   += HAVE_U2F
-DEFINES   += HAVE_IO_U2F U2F_PROXY_MAGIC=\"WAVES\"
-DEFINES   += USB_SEGMENT_SIZE=64
-
-DEFINES   += UNUSED\(x\)=\(void\)x
-DEFINES   += APPVERSION=\"$(APPVERSION)\"
-DEFINES   += MAX_DATA_SIZE=128
-
-DEFINES   += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
-
-
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-DEFINES       += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000
-DEFINES       += HAVE_BLE_APDU # basic ledger apdu transport over BLE
-endif
-
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-else
-DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-DEFINES       += HAVE_GLO096
-DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
-DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-endif
-
-# Enabling debug PRINTF
-DEBUG = 0
-ifneq ($(DEBUG),0)
-
-        ifeq ($(TARGET_NAME),TARGET_NANOS)
-                DEFINES   += HAVE_PRINTF PRINTF=screen_printf
-        else
-                DEFINES   += HAVE_PRINTF PRINTF=mcu_usb_printf
-        endif
-else
-        DEFINES   += PRINTF\(...\)=
-endif
-
-##############
-#  Compiler  #
-##############
-ifneq ($(BOLOS_ENV),)
-$(info BOLOS_ENV=$(BOLOS_ENV))
-CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
-GCCPATH := $(BOLOS_ENV)/gcc-arm-none-eabi-8-2018-q4-major/bin/
-else
-$(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
-endif
-ifeq ($(CLANGPATH),)
-$(info CLANGPATH is not set: clang will be used from PATH)
-endif
-ifeq ($(GCCPATH),)
-$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
-endif
-
-CC := $(CLANGPATH)clang
-CFLAGS += -O3 -Os
-
-AS := $(GCCPATH)arm-none-eabi-gcc
-AFLAGS +=
-
-LD := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -O3 -Os
-LDLIBS += -lm -lgcc -lc
-
-# Main rules
-
-all: default
-    $(info $(APP_LOAD_PARAMS))
-
-load: all
-	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
-
-delete:
-	python -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
-
-# Import rules to build glyphs
-# NOTE: src/glyphs.* should be removed to recompile it. Or just use 'clean'.
-include $(BOLOS_SDK)/Makefile.glyphs
-
-# Import generic rules from the SDK
-
-include $(BOLOS_SDK)/Makefile.rules
-
-
-listvariants:
-	@echo VARIANTS COIN waves

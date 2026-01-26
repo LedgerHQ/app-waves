@@ -12,6 +12,10 @@ def test_app_mainmenu(device: Device,
     if device.is_nano:
         instructions += [
             NavInsID.RIGHT_CLICK,
+            NavInsID.BOTH_CLICK,
+            NavInsID.RIGHT_CLICK,
+            NavInsID.RIGHT_CLICK,
+            NavInsID.BOTH_CLICK,
             NavInsID.RIGHT_CLICK
         ]
 

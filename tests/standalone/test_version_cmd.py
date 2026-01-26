@@ -30,7 +30,7 @@ class P2(IntEnum):
 
 # 8006000000
 # In this test we check that the GET_APP_NAME replies the application name
-def test_app_name(backend: BackendInterface) -> None:
+def test_version_name(backend: BackendInterface) -> None:
     # Use the app interface instead of raw interface
     response = backend.exchange(cla=CLA,
                                      ins=InsType.GET_VERSION,

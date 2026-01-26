@@ -9,7 +9,7 @@ int ed25519_pk_to_curve25519(unsigned char *curve25519_pk,
   if (ge25519_has_small_order(ed25519_pk) != 0) {
     return -1;
   }
-
+  
   fe25519_frombytes(AY, ed25519_pk);
   fe25519_1(one_minus_y);
   fe25519_sub(one_minus_y, one_minus_y, AY);
