@@ -78,7 +78,7 @@ PATH_APP_LOAD_PARAMS = "44'/5741564'"   # purpose=coin(44) / coin_type=Testnet(1
 #   * It must at least contains one value.
 #   * Values can be the app ticker or anything else but should be unique.
 VARIANT_PARAM = COIN
-VARIANT_VALUES = Waves
+VARIANT_VALUES = waves
 
 # Enabling DEBUG_OVER_USB flag will enable PRINTF over USB
 # This will force DISABLE_OS_IO_STACK_USE and add USB CDC profile
@@ -139,3 +139,5 @@ ifeq ($(DEBUG), 1)
     # Для Speculos иногда используется:
     DEFINES += HAVE_PRINTF PRINTF=mcu_usb_printf
 endif
+
+APP_FLAGS_APP_LOAD_PARAMS = 0x240
