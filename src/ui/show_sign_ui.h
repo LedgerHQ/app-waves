@@ -1,0 +1,21 @@
+#include "sign.h"
+
+void show_transfer_confirmation_flow(void);  
+void show_burn_confirmation_flow(void);
+void show_cancel_lease_confirmation_flow(void);
+void show_create_alias_confirmation_flow(void);
+void show_data_confirmation_flow(void);  
+void show_bytes_confirmation_flow(void);
+void show_issue_confirmation_flow(void);
+void show_lease_confirmation_flow(void);
+void show_legacy_tx_confirmation_flow(void);
+void show_mass_transfer_confirmation_flow(void);
+void show_reissue_confirmation_flow(void);
+void show_set_asset_script_confirmation_flow(void);
+void show_set_script_confirmation_flow(void);
+void show_sponsor_fee_confirmation_flow(void);
+void show_transfer_confirmation_flow(void);
+void show_ivoke_confirmation_flow(void);
+void show_update_asset_confirmation_flow(void);
+void show_order_confirmation_flow(void);
+int show_sign_ui(void);

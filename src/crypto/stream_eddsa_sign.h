@@ -38,21 +38,19 @@ typedef struct streamEddsaContext_t {
   } u;
   cx_sha512_t hash_ctx;
   cx_blake2b_t data_hash_ctx;
-  unsigned char first_data_hash[32];
 } streamEddsaContext_t;
 
-void stream_eddsa_sign_step1(streamEddsaContext_t *eddsa_context,
+cx_err_t stream_eddsa_sign_step1(streamEddsaContext_t *eddsa_context,
                              const cx_ecfp_private_key_t *pv_key);
 
-void stream_eddsa_sign_step2(streamEddsaContext_t *eddsa_context,
+cx_err_t stream_eddsa_sign_step2(streamEddsaContext_t *eddsa_context,
                              const unsigned char *hash, unsigned int hash_len);
 
-void stream_eddsa_sign_step3(streamEddsaContext_t *eddsa_context);
+cx_err_t stream_eddsa_sign_step3(streamEddsaContext_t *eddsa_context);
 
-void stream_eddsa_sign_step4(streamEddsaContext_t *eddsa_context,
+cx_err_t stream_eddsa_sign_step4(streamEddsaContext_t *eddsa_context,
                              const unsigned char *hash, unsigned int hash_len);
 
-int stream_eddsa_sign_step5(streamEddsaContext_t *eddsa_context,
-                            unsigned char *sig);
+cx_err_t stream_eddsa_sign_step5(streamEddsaContext_t *eddsa_context, unsigned char *sig, int *res);
 
 #endif // STREAM_EDDSA_SIGN_H

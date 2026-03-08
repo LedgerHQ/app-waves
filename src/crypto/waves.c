@@ -21,31 +21,52 @@
 #include "waves.h"
 #include "ledger_crypto.h"
 #include "stream_eddsa_sign.h"
+#include "string.h"
 
-void waves_secure_hash(const uint8_t *message, size_t message_len,
+bool waves_secure_hash(const uint8_t *message, size_t message_len,
                        uint8_t hash[32]) {
-  blake2b_256(message, message_len, hash);
-  keccak_256(hash, 32, hash);
+  bool error = false;                      
+  error = blake2b_256_no_throw(message, message_len, hash) != CX_OK;
+  return error || keccak_256_no_throw(hash, 32, hash) != CX_OK;
 }
 
 // Build waves address from the curve25519 public key, check
-// https://github.com/wavesplatform/Waves/wiki/Data-Structures#address
-void waves_public_key_to_address(const ed25519_public_key public_key,
+// https://docs.wavesprotocol.org/ru/blockchain/binary-format/address-binary-format
+bool waves_public_key_to_address(const ed25519_public_key public_key,
                                  const unsigned char network_byte,
                                  unsigned char *output) {
   uint8_t public_key_hash[32];
   uint8_t address[26];
   uint8_t checksum[32];
-  waves_secure_hash(public_key, 32, public_key_hash);
+  if (waves_secure_hash(public_key, 32, public_key_hash)) {
+    return true; 
+  }
 
   address[0] = 0x01;
   address[1] = network_byte;
-  os_memmove(&address[2], public_key_hash, 20);
+  memmove(&address[2], public_key_hash, 20);
 
+  if (waves_secure_hash(address, 22, checksum)) {
+    return true;
+  }
+
+  memmove(&address[22], checksum, 4);
+
+  size_t length = 36;
+  b58enc((char *)output, &length, address, 26);
+  return false;
+}
+
+void waves_public_key_hash_to_address(
+    const ed25519_public_key_hash public_key_hash,
+    const unsigned char network_byte, unsigned char *output) {
+  uint8_t address[26];
+  uint8_t checksum[32];
+  address[0] = 0x01;
+  address[1] = network_byte;
+  memmove(&address[2], public_key_hash, 20);
   waves_secure_hash(address, 22, checksum);
-
-  os_memmove(&address[22], checksum, 4);
-
+  memmove(&address[22], checksum, 4);
   size_t length = 36;
   b58enc((char *)output, &length, address, 26);
 }
