@@ -1,64 +1,44 @@
-# Prerequisites
-*.d
+# Compilation files of the application
+build/
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# Project-level stuff
+# Legacy compilation output
+bin/
 debug/
-.DS_Store
-*.pyc
 
-# Glyphs gen files
-src/glyphs.c
-src/glyphs.h
+# Nano NBGL reversed icon for Home Screen (SDK-generated)
+glyphs/home_waves_14px.gif
 
-# Build dir
-bin
+# Temporary directory with snapshots taken during test runs
+snapshots-tmp/
+
+# Unit tests and code coverage
+unit-tests/build/
+unit-tests/coverage/
+unit-tests/coverage.info
+
+# Fuzzing
+fuzzing/build/
+fuzzing/corpus/
+fuzzing/out/
+
+# Python
+.venv/
+.venv-docker/
+.venv-golden/
+*.pyc[cod]
+*.egg
+__pycache__/
+*.egg-info/
+.eggs/
+.python-version
+
+# Doxygen
+doc/html
+doc/latex
+
+# Virtual env for sideload (macOS and Windows)
+ledger/
+
+# Helper script git clone
+tests/swap/.test_dependencies/app-exchange/
+tests/swap/.test_dependencies/app-ethereum/
