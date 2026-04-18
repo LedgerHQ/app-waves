@@ -1,4 +1,18 @@
 [app]
 build_directory = "./"
 sdk = "C"
-devices = ["nanox", "nanos+"]
+devices = ["nanox", "nanos+", "stax", "flex", "apex_p"]
+
+# use_cases are named sets of compilation flags that Ledger tools can branch on to ease developer experience
+# - The application makefile allows `make <use_case_name>`
+# - The Ledger VSCode extension offers use_cases compilation in the UI
+# The production deployment pipeline will not use these use_cases; they are only for development and testing.
+[use_cases]
+# A standard use case, compiling with logs enabled
+debug = "DEBUG=1"
+
+[unit_tests]
+directory = "./unit-tests/"
+
+[pytest.standalone]
+directory = "./tests/standalone/"
